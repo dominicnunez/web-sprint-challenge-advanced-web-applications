@@ -6,7 +6,7 @@
     "test": "cross-env NODE_ENV=testing jest --watch",
     "webpack": "cross-env NODE_ENV=production webpack",
     "heroku-postbuild": "npm run webpack",
-    "frontend": "webpack serve --open",
+    "frontend": "webpack-dev-server --open-app-name 'google chrome'",
     "backend": "node index.js",
     "start": "npm run backend"
   },
