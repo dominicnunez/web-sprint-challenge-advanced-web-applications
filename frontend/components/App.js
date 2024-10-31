@@ -6,8 +6,8 @@ import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
 
-const articlesUrl = 'http://localhost:9000/api/articles'
-const loginUrl = 'http://localhost:9000/api/login'
+const ARTICLES_URL = 'http://localhost:9000/api/articles'
+const LOGIN_URL = 'http://localhost:9000/api/login'
 
 export default function App() {
   // ✨ MVP can be achieved with these states
@@ -31,9 +31,35 @@ export default function App() {
     redirectToLogin()
   }
 
-  const isLoading = () => {
+  const startLoading = () => {
     setMessage('')
     setSpinnerOn(true)
+  }
+
+  const createFetch = (url, method, headers, body) => {
+    startLoading()
+    return fetch(url, {
+      method,
+      headers,
+      body
+    })
+      .then(res => {
+        if (res.status === 200) {
+          return res.json()
+        } else {
+          throw new Error('Operation failed')
+        }
+      })
+      .then(data => {
+        setMessage(data.message)
+        return data
+      })
+      .catch(err => {
+        throw new Error(err.message)
+      })
+      .finally(() => {
+        setSpinnerOn(false)
+      })
   }
 
   const login = ({ username, password }) => {
@@ -43,12 +69,10 @@ export default function App() {
     // On success, we should set the token to local storage in a 'token' key,
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
-    isLoading()
-    fetch(loginUrl, {
+    startLoading()
+    fetch(LOGIN_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: returnAuthHeaders(1),
       body: JSON.stringify({ username, password })
     })
       .then(res => {
@@ -80,17 +104,17 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
-    isLoading()
-    fetch(articlesUrl, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+    startLoading()
+    fetch(ARTICLES_URL, {
+      headers: returnAuthHeaders(2),
     })
       .then(res => {
         if (res.status === 200) {
           return res.json()
         } else if (res.status === 401) {
-          localStorage.removeItem('token')
+          if (localStorage.getItem('token')) {
+            localStorage.removeItem('token')
+          }
           redirectToLogin()
         } else {
           throw new Error('Failed to fetch articles')
@@ -113,12 +137,10 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-    fetch(articlesUrl, {
+    startLoading()
+    fetch(ARTICLES_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: returnAuthHeaders(3),
       body: JSON.stringify(article)
     })
       .then(res => {
@@ -144,19 +166,34 @@ export default function App() {
   }
 
   const articleURL = (article_id) => {
-    return `${articlesUrl}/${article_id}`
+    return `${ARTICLES_URL}/${article_id}`
   }
 
+  const returnAuthHeaders = (integer) => {
+    const contentType = { 'Content-Type': 'application/json'}
+    const authToken = { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    const contentTypeAuthToken = { ...contentType, ...authToken }
+
+    if (integer == 1) {
+      return contentType;
+    } else if (integer == 2) {
+      return authToken;
+    } else if (integer == 3) {
+      return contentTypeAuthToken
+    }
+
+    return contentTypeAuthToken;
+  };
+  
   const updateArticle = ({ article_id, article }) => {
+    setCurrentArticleId(article_id)
     const updateURL = articleURL(article_id)
     // ✨ implement
     // You got this!
+    startLoading()
     fetch(updateURL, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: returnAuthHeaders(3),
       body: JSON.stringify(article)
     })
       .then(res => {
@@ -180,6 +217,7 @@ export default function App() {
         setMessage(data.message)
       })
       .catch(err => {
+        console.error(err)
         throw new Error(err.message)
       })
       .finally(() => {
@@ -190,11 +228,10 @@ export default function App() {
   const deleteArticle = article_id => {
     // ✨ implement
     const deleteURL = articleURL(article_id)
+    startLoading()
     fetch(deleteURL, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+      headers: returnAuthHeaders(2),
     })
       .then(res => {
         if (res.status === 200) {
