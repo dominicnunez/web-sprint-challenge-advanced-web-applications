@@ -1,25 +1,29 @@
-import React, { useState } from 'react'
-import { NavLink, Routes, Route, useNavigate } from 'react-router-dom'
-import Articles from './Articles'
-import LoginForm from './LoginForm'
-import Message from './Message'
-import ArticleForm from './ArticleForm'
-import Spinner from './Spinner'
+import React, { useState } from "react";
+import { NavLink, Routes, Route, useNavigate } from "react-router-dom";
+import Articles from "./Articles";
+import LoginForm from "./LoginForm";
+import Message from "./Message";
+import ArticleForm from "./ArticleForm";
+import Spinner from "./Spinner";
 
-const ARTICLES_URL = 'http://localhost:9000/api/articles'
-const LOGIN_URL = 'http://localhost:9000/api/login'
+const ARTICLES_URL = "http://localhost:9000/api/articles";
+const LOGIN_URL = "http://localhost:9000/api/login";
 
 export default function App() {
   // ✨ MVP can be achieved with these states
-  const [message, setMessage] = useState('')
-  const [articles, setArticles] = useState([])
-  const [currentArticleId, setCurrentArticleId] = useState()
-  const [spinnerOn, setSpinnerOn] = useState(false)
+  const [message, setMessage] = useState("");
+  const [articles, setArticles] = useState([]);
+  const [currentArticleId, setCurrentArticleId] = useState();
+  const [spinnerOn, setSpinnerOn] = useState(false);
 
   // ✨ Research `useNavigate` in React Router v.6
-  const navigate = useNavigate()
-  const redirectToLogin = () => { navigate('/') }
-  const redirectToArticles = () => { navigate('/articles') }
+  const navigate = useNavigate();
+  const redirectToLogin = () => {
+    navigate("/");
+  };
+  const redirectToArticles = () => {
+    navigate("/articles");
+  };
 
   const logout = () => {
     // ✨ implement
@@ -27,40 +31,70 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
-    localStorage.removeItem('token')
-    redirectToLogin()
-  }
+    localStorage.removeItem("token");
+    redirectToLogin();
+  };
 
   const startLoading = () => {
-    setMessage('')
-    setSpinnerOn(true)
-  }
+    setMessage("");
+    setSpinnerOn(true);
+  };
 
-  const createFetch = (url, method, headers, body) => {
-    startLoading()
+  const createFetch = ({
+    url,
+    method = "GET",
+    headers = {},
+    body = null,
+    onSuccess,
+    onError,
+  }) => {
+    startLoading();
     return fetch(url, {
       method,
       headers,
-      body
+      body: body ? JSON.stringify(body) : null,
     })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
+      .then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          return res.json();
+        } else if (res.status === 401) {
+          localStorage.removeItem("token");
+          redirectToLogin();
+          throw new Error("Unauthorized access");
         } else {
-          throw new Error('Operation failed')
+          throw new Error("Operation failed");
         }
       })
-      .then(data => {
-        setMessage(data.message)
-        return data
+      .then((data) => {
+        setMessage(data.message || "");
+        if (onSuccess) onSuccess(data);
       })
-      .catch(err => {
-        throw new Error(err.message)
+      .catch((err) => {
+        if (onError) onError(err);
+        setMessage(err.message);
       })
       .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+        setSpinnerOn(false);
+      });
+  };
+
+  const returnAuthHeaders = (integer) => {
+    const contentType = { "Content-Type": "application/json" };
+    const authToken = {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    };
+    const contentTypeAuthToken = { ...contentType, ...authToken };
+
+    if (integer == 1) {
+      return contentType;
+    } else if (integer == 2) {
+      return authToken;
+    } else if (integer == 3) {
+      return contentTypeAuthToken;
+    }
+
+    return contentTypeAuthToken;
+  };
 
   const login = ({ username, password }) => {
     // ✨ implement
@@ -69,31 +103,19 @@ export default function App() {
     // On success, we should set the token to local storage in a 'token' key,
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
-    startLoading()
-    fetch(LOGIN_URL, {
+    startLoading();
+    createFetch({
+      url: LOGIN_URL,
       method: 'POST',
       headers: returnAuthHeaders(1),
-      body: JSON.stringify({ username, password })
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else {
-          throw new Error('Login failed')
-        }
-      })
-      .then(data => {
-        localStorage.setItem('token', data.token)
-        setMessage(data.message)
-        redirectToArticles()
-      })
-      .catch(err => {
-        throw new Error(err.message)
-      })
-      .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+      body: { username, password },
+      onSuccess: data => {
+        localStorage.setItem('token', data.token);
+        setMessage(data.message);
+        redirectToArticles();
+      },
+    });
+  };
 
   const getArticles = () => {
     // ✨ implement
@@ -104,181 +126,110 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
-    startLoading()
-    fetch(ARTICLES_URL, {
+    startLoading();
+    createFetch({
+      url: ARTICLES_URL,
       headers: returnAuthHeaders(2),
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else if (res.status === 401) {
-          if (localStorage.getItem('token')) {
-            localStorage.removeItem('token')
-          }
-          redirectToLogin()
-        } else {
-          throw new Error('Failed to fetch articles')
-        }
-      })
-      .then(data => {
-        setArticles(data)
-        setMessage(data.message)
-      })
-      .catch(err => {
-        throw new Error(err.message)
-      })
-      .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+      onSuccess: data => {
+        setArticles(data);
+        setMessage(data.message);
+      }
+    });
+  };
 
-  const postArticle = article => {
+  const postArticle = (article) => {
     // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-    startLoading()
-    fetch(ARTICLES_URL, {
+    startLoading();
+    createFetch({
+      url: ARTICLES_URL,
       method: 'POST',
       headers: returnAuthHeaders(3),
-      body: JSON.stringify(article)
-    })
-      .then(res => {
-        if (res.status === 201) {
-          return res.json()
-        } else if (res.status === 401) {
-          localStorage.removeItem('token')
-          redirectToLogin()
-        } else {
-          throw new Error('Failed to post article')
-        }
-      })
-      .then(data => {
-        setArticles([...articles, data])
-        setMessage(data.message)
-      })
-      .catch(err => {
-        throw new Error(err.message)
-      })
-      .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+      body: article,
+      onSuccess: data => {
+        setArticles([...articles, data]);
+        setMessage(data.message);
+      }
+    });
+  };
 
   const articleURL = (article_id) => {
-    return `${ARTICLES_URL}/${article_id}`
-  }
-
-  const returnAuthHeaders = (integer) => {
-    const contentType = { 'Content-Type': 'application/json'}
-    const authToken = { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    const contentTypeAuthToken = { ...contentType, ...authToken }
-
-    if (integer == 1) {
-      return contentType;
-    } else if (integer == 2) {
-      return authToken;
-    } else if (integer == 3) {
-      return contentTypeAuthToken
-    }
-
-    return contentTypeAuthToken;
+    return `${ARTICLES_URL}/${article_id}`;
   };
-  
+
   const updateArticle = ({ article_id, article }) => {
-    setCurrentArticleId(article_id)
-    const updateURL = articleURL(article_id)
+    setCurrentArticleId(article_id);
+    const updateURL = articleURL(article_id);
     // ✨ implement
     // You got this!
-    startLoading()
-    fetch(updateURL, {
+    startLoading();
+    createFetch({
+      url: updateURL,
       method: 'PUT',
       headers: returnAuthHeaders(3),
-      body: JSON.stringify(article)
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else if (res.status === 401) {
-          localStorage.removeItem('token')
-          redirectToLogin()
-        } else {
-          throw new Error('Failed to update article')
-        }
-      })
-      .then(data => {
-        const updatedArticles = articles.map(a => {
-          if (a.article_id === article_id) {
-            return data
-          }
-          return a
-        })
-        setArticles(updatedArticles)
-        setMessage(data.message)
-      })
-      .catch(err => {
-        console.error(err)
-        throw new Error(err.message)
-      })
-      .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+      body: article,
+      onSuccess: data => {
+        const updatedArticles = articles.map(a =>
+          a.article_id === article_id ? data : a
+        );
+        setArticles(updatedArticles);
+        setMessage(data.message);
+      }
+    });
+  };
 
-  const deleteArticle = article_id => {
+  const deleteArticle = (article_id) => {
     // ✨ implement
-    const deleteURL = articleURL(article_id)
-    startLoading()
-    fetch(deleteURL, {
+    const deleteURL = articleURL(article_id);
+    startLoading();
+    createFetch({
+      url: articleURL(article_id),
       method: 'DELETE',
       headers: returnAuthHeaders(2),
-    })
-      .then(res => {
-        if (res.status === 200) {
-          return res.json()
-        } else if (res.status === 401) {
-          localStorage.removeItem('token')
-          redirectToLogin()
-        } else {
-          throw new Error('Failed to delete article')
-        }
-      })
-      .then(data => {
-        const updatedArticles = articles.filter(a => a.article_id !== article_id)
-        setArticles(updatedArticles)
-        setMessage(data.message)
-      })
-      .catch(err => {
-        throw new Error(err.message)
-      })
-      .finally(() => {
-        setSpinnerOn(false)
-      })
-  }
+      onSuccess: data => {
+        const updatedArticles = articles.filter(a => a.article_id !== article_id);
+        setArticles(updatedArticles);
+        setMessage(data.message);
+      }
+    });
+  };
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
       <Spinner />
       <Message />
-      <button id="logout" onClick={logout}>Logout from app</button>
-      <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
+      <button id="logout" onClick={logout}>
+        Logout from app
+      </button>
+      <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}>
+        {" "}
+        {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
         <nav>
-          <NavLink id="loginScreen" to="/">Login</NavLink>
-          <NavLink id="articlesScreen" to="/articles">Articles</NavLink>
+          <NavLink id="loginScreen" to="/">
+            Login
+          </NavLink>
+          <NavLink id="articlesScreen" to="/articles">
+            Articles
+          </NavLink>
         </nav>
         <Routes>
           <Route path="/" element={<LoginForm />} />
-          <Route path="articles" element={
-            <>
-              <ArticleForm />
-              <Articles />
-            </>
-          } />
+          <Route
+            path="articles"
+            element={
+              <>
+                <ArticleForm />
+                <Articles />
+              </>
+            }
+          />
         </Routes>
         <footer>Bloom Institute of Technology 2024</footer>
       </div>
     </>
-  )
+  );
 }
