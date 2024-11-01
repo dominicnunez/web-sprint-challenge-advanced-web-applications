@@ -71,6 +71,7 @@ export default function App() {
       })
       .catch((err) => {
         if (onError) onError(err);
+        console.log(err);
         setMessage(err.message);
       })
       .finally(() => {
