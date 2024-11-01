@@ -40,7 +40,7 @@ export default function App() {
     setSpinnerOn(true);
   };
 
-  const createFetch = ({
+  const doFetch = ({
     url,
     method = "GET",
     headers = {},
@@ -102,7 +102,7 @@ export default function App() {
     // On success, we should set the token to local storage in a 'token' key,
     // put the server success message in its proper state, and redirect
     // to the Articles screen. Don't forget to turn off the spinner!
-    createFetch({
+    doFetch({
       url: LOGIN_URL,
       method: 'POST',
       headers: returnAuthHeaders(1),
@@ -124,7 +124,7 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
-    createFetch({
+    doFetch({
       url: ARTICLES_URL,
       headers: returnAuthHeaders(2),
       onSuccess: data => {
@@ -139,7 +139,7 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
-    createFetch({
+    doFetch({
       url: ARTICLES_URL,
       method: 'POST',
       headers: returnAuthHeaders(),
@@ -159,7 +159,7 @@ export default function App() {
     // ✨ implement
     // You got this!
     setCurrentArticleId(article_id);
-    createFetch({
+    doFetch({
       url: setArticleURL(currentArticleId),
       method: 'PUT',
       headers: returnAuthHeaders(),
@@ -177,7 +177,7 @@ export default function App() {
   const deleteArticle = (article_id) => {
     // ✨ implement
     setCurrentArticleId(article_id);
-    createFetch({
+    doFetch({
       url: setArticleURL(currentArticleId),
       method: 'DELETE',
       headers: returnAuthHeaders(2),
