@@ -215,7 +215,7 @@ export default function App() {
             path="articles"
             element={
               <>
-                <ArticleForm setCurrentArticleId={setCurrentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
+                <ArticleForm currentArticleId={currentArticleId} setCurrentArticleId={setCurrentArticleId} articles={articles} postArticle={postArticle} updateArticle={updateArticle} />
                 <Articles setCurrentArticleId={setCurrentArticleId} articles={articles} getArticles={getArticles} deleteArticle={deleteArticle} />
               </>
             }
