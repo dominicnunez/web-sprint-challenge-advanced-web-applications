@@ -89,8 +89,6 @@ export default function App() {
       return contentType;
     } else if (integer == 2) {
       return authToken;
-    } else if (integer == 3) {
-      return contentTypeAuthToken;
     }
 
     return contentTypeAuthToken;
@@ -146,7 +144,7 @@ export default function App() {
     createFetch({
       url: ARTICLES_URL,
       method: 'POST',
-      headers: returnAuthHeaders(3),
+      headers: returnAuthHeaders(),
       body: article,
       onSuccess: data => {
         setArticles([...articles, data]);
@@ -155,20 +153,19 @@ export default function App() {
     });
   };
 
-  const articleURL = (article_id) => {
+  const setArticleURL = (article_id) => {
     return `${ARTICLES_URL}/${article_id}`;
   };
 
   const updateArticle = ({ article_id, article }) => {
-    setCurrentArticleId(article_id);
-    const updateURL = articleURL(article_id);
     // ✨ implement
     // You got this!
     startLoading();
+    setCurrentArticleId(article_id);
     createFetch({
-      url: updateURL,
+      url: setArticleURL(currentArticleId),
       method: 'PUT',
-      headers: returnAuthHeaders(3),
+      headers: returnAuthHeaders(),
       body: article,
       onSuccess: data => {
         const updatedArticles = articles.map(a =>
@@ -182,10 +179,10 @@ export default function App() {
 
   const deleteArticle = (article_id) => {
     // ✨ implement
-    const deleteURL = articleURL(article_id);
     startLoading();
+    setCurrentArticleId(article_id);
     createFetch({
-      url: articleURL(article_id),
+      url: setArticleURL(currentArticleId),
       method: 'DELETE',
       headers: returnAuthHeaders(2),
       onSuccess: data => {
@@ -199,8 +196,8 @@ export default function App() {
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
-      <Spinner />
-      <Message />
+      <Spinner on={spinnerOn} />
+      <Message message={message}/>
       <button id="logout" onClick={logout}>
         Logout from app
       </button>
@@ -217,13 +214,13 @@ export default function App() {
           </NavLink>
         </nav>
         <Routes>
-          <Route path="/" element={<LoginForm />} />
+          <Route path="/" element={<LoginForm login={login}/>} />
           <Route
             path="articles"
             element={
               <>
-                <ArticleForm />
-                <Articles />
+                <ArticleForm setCurrentArticleId={setCurrentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
+                <Articles setCurrentArticleId={setCurrentArticleId} articles={articles} getArticles={getArticles} deleteArticle={deleteArticle} />
               </>
             }
           />
