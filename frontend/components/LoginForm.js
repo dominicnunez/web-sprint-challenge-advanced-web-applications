@@ -1,19 +1,21 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PT from 'prop-types'
+import { useForm } from "../hooks/useForm";
 
 const initialFormValues = {
   username: '',
   password: '',
 }
 export default function LoginForm(props) {
-  const [values, setValues] = useState(initialFormValues)
+  const [values, onChange] = useForm(initialFormValues)
   // ✨ where are my props? Destructure them here
   const { login } = props
 
-  const onChange = evt => {
-    const { id, value } = evt.target
-    setValues({ ...values, [id]: value })
-  }
+  // const onChange = evt => {
+  //   const { id, value } = evt.target
+  //   setValues({ ...values, [id]: value })
+  // }
+  // replace with hook
 
   const onSubmit = evt => {
     evt.preventDefault()
