@@ -6,8 +6,9 @@ export function useForm(initialValues) {
 
   const onChange = useCallback((evt) => {
     const { id, value } = evt.target;
-    setValues((prevValues) => ({ ...prevValues, [id]: value }));
+    setValues((prevValues) => ({ ...prevValues, [id]: value.trim() }));
   }, []);
 
+  console.log('useForm', values);
   return [ values, setValues, onChange ];
 }
