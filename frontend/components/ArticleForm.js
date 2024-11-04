@@ -5,8 +5,8 @@ import { useForm } from "../hooks/useForm";
 const initialFormValues = { title: "", text: "", topic: "" };
 
 export default function ArticleForm(props) {
-  const {values, setValues, onChange} = useForm(initialFormValues);
-  const [currentArticle, setCurrentArticle] = useState(null);
+  const [ values, setValues, onChange ] = useForm(initialFormValues);
+  const [ currentArticle, setCurrentArticle ] = useState(null);
   // ✨ where are my props? Destructure them here
   const { postArticle, updateArticle, setCurrentArticleId } = props;
 
@@ -31,10 +31,22 @@ export default function ArticleForm(props) {
     // ✨ implement
     // We must submit a new post or update an existing one,
     // depending on the truthyness of the `currentArticle` prop.
+    // If it's truthy, we should call `updateArticle` with the `currentArticle.article_id`
+    // and the form values as arguments.
+    // If it's not, we should call `postArticle` with the form values as an argument.
+    if (currentArticle) {
+      updateArticle(currentArticle.article_id, values);
+      setCurrentArticleId(null);
+    } else {
+      postArticle(values);
+    }
   };
 
   const isDisabled = () => {
     // ✨ implement
+    // The submit button should be disabled if the title, text, or topic are empty.
+    // Otherwise, it should be enabled.
+    return !values.title || !values.text || !values.topic;
   };
 
   return (
