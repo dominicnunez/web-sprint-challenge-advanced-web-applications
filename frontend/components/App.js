@@ -128,7 +128,7 @@ export default function App() {
       url: ARTICLES_URL,
       headers: returnAuthHeaders(2),
       onSuccess: data => {
-        setArticles(data);
+        setArticles(data.articles);
         setMessage(data.message);
       }
     });
@@ -145,7 +145,7 @@ export default function App() {
       headers: returnAuthHeaders(),
       body: article,
       onSuccess: data => {
-        setArticles([...articles, data]);
+        tt
         setCurrentArticleId(null);
         setMessage(data.message);
       }
@@ -186,6 +186,7 @@ export default function App() {
       onSuccess: data => {
         const updatedArticles = articles.filter(a => a.article_id !== article_id);
         setArticles(updatedArticles);
+        setCurrentArticleId(null);
         setMessage(data.message);
       }
     });
