@@ -9,5 +9,5 @@ export function useForm(initialValues) {
     setValues((prevValues) => ({ ...prevValues, [id]: value }));
   }, []);
 
-  return { values, setValues, onChange };
+  return [ values, setValues, onChange ];
 }
