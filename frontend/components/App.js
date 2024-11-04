@@ -82,7 +82,7 @@ export default function App() {
   const returnAuthHeaders = (integer) => {
     const contentType = { "Content-Type": "application/json" };
     const authToken = {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `${localStorage.getItem("token")}`,
     };
     const contentTypeAuthToken = { ...contentType, ...authToken };
 
@@ -146,6 +146,7 @@ export default function App() {
       body: article,
       onSuccess: data => {
         setArticles([...articles, data]);
+        setCurrentArticleId(null);
         setMessage(data.message);
       }
     });
@@ -169,6 +170,7 @@ export default function App() {
           a.article_id === article_id ? data : a
         );
         setArticles(updatedArticles);
+        setCurrentArticleId(null);
         setMessage(data.message);
       }
     });
@@ -215,8 +217,8 @@ export default function App() {
             path="articles"
             element={
               <>
-                <ArticleForm setCurrentArticleId={setCurrentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
-                <Articles setCurrentArticleId={setCurrentArticleId} articles={articles} getArticles={getArticles} deleteArticle={deleteArticle} />
+                <ArticleForm articles={articles} currentArticleId={currentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
+                <Articles currentArticleId={currentArticleId} setCurrentArticleId={setCurrentArticleId} articles={articles} getArticles={getArticles} deleteArticle={deleteArticle} />
               </>
             }
           />

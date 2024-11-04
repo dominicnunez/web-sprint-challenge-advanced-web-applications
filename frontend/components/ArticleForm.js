@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import PT from "prop-types";
 import { useForm } from "../hooks/useForm";
 
@@ -6,26 +6,27 @@ const initialFormValues = { title: "", text: "", topic: "" };
 
 export default function ArticleForm(props) {
   const [ values, setValues, onChange ] = useForm(initialFormValues);
-  const [ currentArticle, setCurrentArticle ] = useState(null);
   // ✨ where are my props? Destructure them here
-  const { postArticle, updateArticle, setCurrentArticleId } = props;
+  const { articles, postArticle, updateArticle, currentArticleId } = props;
 
   useEffect(() => {
     // ✨ implement
-    // Every time the `currentArticle` prop changes, we should check it for truthiness:
+    // Every time the `currentArticleId` prop changes, we should check it for truthiness:
     // if it's truthy, we should set its title, text and topic into the corresponding
     // values of the form. If it's not, we should reset the form back to initial values.
-    if (currentArticle) {
+    if (currentArticleId) {
+      // find article by article id and set values
+      const currentArticle = articles.find(article => article.article_id === currentArticleId);
       setValues({
         title: currentArticle.title,
         text: currentArticle.text,
-        topic: currentArticle.topic,
+        topic: currentArticle.topic
       });
     } else {
       setValues(initialFormValues);
     }
-  }, [currentArticle, setValues]);
-
+  }, [currentArticleId, setValues]);
+  
   const onSubmit = (evt) => {
     evt.preventDefault();
     // ✨ implement
@@ -34,12 +35,13 @@ export default function ArticleForm(props) {
     // If it's truthy, we should call `updateArticle` with the `currentArticle.article_id`
     // and the form values as arguments.
     // If it's not, we should call `postArticle` with the form values as an argument.
-    if (currentArticle) {
-      updateArticle(currentArticle.article_id, values);
-      setCurrentArticleId(null);
+    if (currentArticleId) {
+      updateArticle(currentArticleId, values);
     } else {
       postArticle(values);
     }
+    // Finally, we should reset the form values and the `currentArticle` prop.
+    setValues(initialFormValues);
   };
 
   const isDisabled = () => {
@@ -75,10 +77,10 @@ export default function ArticleForm(props) {
         <option value="Node">Node</option>
       </select>
       <div className="button-group">
-        <button disabled={isDisabled()} id="submitArticle">
+        {!currentArticleId && <button disabled={isDisabled()} id="submitArticle">
           Submit
-        </button>
-        <button onClick={Function.prototype}>Cancel edit</button>
+        </button>}
+        {currentArticleId && <button onClick={Function.prototype}>Cancel edit</button>}
       </div>
     </form>
   );
@@ -88,7 +90,7 @@ export default function ArticleForm(props) {
 ArticleForm.propTypes = {
   postArticle: PT.func.isRequired,
   updateArticle: PT.func.isRequired,
-  setCurrentArticleId: PT.func.isRequired,
+  // setCurrentArticleId: PT.func.isRequired,
   currentArticle: PT.shape({
     // can be null or undefined, meaning "create" mode (as opposed to "update")
     article_id: PT.number.isRequired,
