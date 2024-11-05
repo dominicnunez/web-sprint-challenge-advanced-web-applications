@@ -145,7 +145,7 @@ export default function App() {
       headers: returnAuthHeaders(),
       body: article,
       onSuccess: data => {
-        tt
+        setArticles(prevArticles => [...prevArticles, data]);
         setCurrentArticleId(null);
         setMessage(data.message);
       }
