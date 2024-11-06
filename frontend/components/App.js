@@ -179,15 +179,13 @@ export default function App() {
 
   const deleteArticle = (article_id) => {
     // ✨ implement
-    setCurrentArticleId(article_id);
     doFetch({
-      url: setArticleURL(currentArticleId),
+      url: setArticleURL(article_id),
       method: 'DELETE',
       headers: returnAuthHeaders(2),
       onSuccess: data => {
         const updatedArticles = articles.filter(a => a.article_id !== article_id);
         setArticles(updatedArticles);
-        setCurrentArticleId(null);
         setMessage(data.message);
       }
     });
