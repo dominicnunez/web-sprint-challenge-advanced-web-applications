@@ -18,6 +18,7 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate();
+  
   const redirectToLogin = () => {
     navigate("/");
   };
@@ -218,7 +219,7 @@ export default function App() {
             path="articles"
             element={
               <>
-                <ArticleForm articles={articles} currentArticleId={currentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
+                <ArticleForm articles={articles} currentArticleId={currentArticleId} setCurrentArticleId={setCurrentArticleId} postArticle={postArticle} updateArticle={updateArticle} />
                 <Articles currentArticleId={currentArticleId} setCurrentArticleId={setCurrentArticleId} articles={articles} getArticles={getArticles} deleteArticle={deleteArticle} />
               </>
             }

@@ -90,7 +90,7 @@ export default function ArticleForm(props) {
 ArticleForm.propTypes = {
   postArticle: PT.func.isRequired,
   updateArticle: PT.func.isRequired,
-  // setCurrentArticleId: PT.func.isRequired,
+  setCurrentArticleId: PT.func.isRequired,
   currentArticle: PT.shape({
     // can be null or undefined, meaning "create" mode (as opposed to "update")
     article_id: PT.number.isRequired,

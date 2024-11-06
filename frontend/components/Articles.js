@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import PT from 'prop-types'
 
 export default function Articles(props) {
@@ -12,15 +12,17 @@ export default function Articles(props) {
     currentArticleId,
   } = props
 
+  const navigate = useNavigate()
   // ✨ implement conditional logic: if no token exists
   // we should render a Navigate to login screen (React Router v.6)
-  if (!localStorage.getItem('token')) {
-    return <Navigate to="/login" />
-  }
-
   useEffect(() => {
     // ✨ grab the articles here, on first render only
-    getArticles()
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/')
+    } else {
+      getArticles()
+    }
   }, [])
 
   useEffect(() => {
