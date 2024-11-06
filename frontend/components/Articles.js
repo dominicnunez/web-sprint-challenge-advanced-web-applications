@@ -27,6 +27,7 @@ export default function Articles(props) {
 
   useEffect(() => {
     console.log(articles)
+    // getArticles()
   }, [articles])
 
   return (

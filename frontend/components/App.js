@@ -18,7 +18,7 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate();
-  
+
   const redirectToLogin = () => {
     navigate("/");
   };
@@ -32,8 +32,9 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
-    localStorage.removeItem("token");
     redirectToLogin();
+    localStorage.removeItem("token");
+    setMessage("Goodbye!");
   };
 
   const startLoading = () => {
@@ -146,7 +147,7 @@ export default function App() {
       headers: returnAuthHeaders(),
       body: article,
       onSuccess: data => {
-        setArticles(prevArticles => [...prevArticles, data]);
+        setArticles(prevArticles => [...prevArticles, article]);
         setCurrentArticleId(null);
         setMessage(data.message);
       }
@@ -160,9 +161,9 @@ export default function App() {
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
-    setCurrentArticleId(article_id);
+    console.log({currentArticleId, article_id, article})
     doFetch({
-      url: setArticleURL(currentArticleId),
+      url: setArticleURL(article_id),
       method: 'PUT',
       headers: returnAuthHeaders(),
       body: article,

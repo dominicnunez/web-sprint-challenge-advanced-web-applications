@@ -7,7 +7,7 @@ const initialFormValues = { title: "", text: "", topic: "" };
 export default function ArticleForm(props) {
   const [ values, setValues, onChange ] = useForm(initialFormValues);
   // ✨ where are my props? Destructure them here
-  const { articles, postArticle, updateArticle, currentArticleId } = props;
+  const { articles, postArticle, updateArticle, currentArticleId, setCurrentArticleId } = props;
 
   useEffect(() => {
     // ✨ implement
@@ -44,6 +44,11 @@ export default function ArticleForm(props) {
     setValues(initialFormValues);
   };
 
+  const cancelEdit = () => {
+    setCurrentArticleId(null);
+    setValues(initialFormValues);
+  }
+  
   const isDisabled = () => {
     // ✨ implement
     // The submit button should be disabled if the title, text, or topic are empty.
@@ -80,7 +85,7 @@ export default function ArticleForm(props) {
         {<button disabled={isDisabled()} id="submitArticle">
           Submit
         </button>}
-        {currentArticleId && <button onClick={Function.prototype}>Cancel edit</button>}
+        {currentArticleId && <button onClick={cancelEdit}>Cancel edit</button>}
       </div>
     </form>
   );
