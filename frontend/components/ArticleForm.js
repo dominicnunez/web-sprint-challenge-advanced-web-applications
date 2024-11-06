@@ -9,6 +9,10 @@ export default function ArticleForm(props) {
   // ✨ where are my props? Destructure them here
   const { articles, postArticle, updateArticle, currentArticleId, setCurrentArticleId } = props;
 
+  const resetForm = () => {
+    setValues(initialFormValues);
+  };
+
   useEffect(() => {
     // ✨ implement
     // Every time the `currentArticleId` prop changes, we should check it for truthiness:
@@ -16,6 +20,7 @@ export default function ArticleForm(props) {
     // values of the form. If it's not, we should reset the form back to initial values.
     if (currentArticleId) {
       // find article by article id and set values
+
       const currentArticle = articles.find(article => article.article_id === currentArticleId);
       setValues({
         title: currentArticle.title,
@@ -23,7 +28,7 @@ export default function ArticleForm(props) {
         topic: currentArticle.topic
       });
     } else {
-      setValues(initialFormValues);
+      resetForm();
     }
   }, [currentArticleId, setValues]);
   
@@ -35,18 +40,23 @@ export default function ArticleForm(props) {
     // If it's truthy, we should call `updateArticle` with the `currentArticle.article_id`
     // and the form values as arguments.
     // If it's not, we should call `postArticle` with the form values as an argument.
+    const trimmedValues = Object.entries(values).reduce((acc, [key, value]) => {
+      acc[key] = value.trim();
+      return acc;
+    }, {});
+
     if (currentArticleId) {
-      updateArticle({ "article_id": currentArticleId, "article": values })
+      updateArticle({ "article_id": currentArticleId, "article": trimmedValues })
     } else {
-      postArticle(values);
+      postArticle(trimmedValues);
     }
     // Finally, we should reset the form values.
-    setValues(initialFormValues);
+    resetForm();
   };
 
   const cancelEdit = () => {
     setCurrentArticleId(null);
-    setValues(initialFormValues);
+    resetForm();
   }
   
   const isDisabled = () => {
