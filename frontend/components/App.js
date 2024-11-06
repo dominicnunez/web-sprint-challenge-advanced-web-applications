@@ -161,7 +161,6 @@ export default function App() {
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
-    console.log({currentArticleId, article_id, article})
     doFetch({
       url: setArticleURL(article_id),
       method: 'PUT',
@@ -169,7 +168,7 @@ export default function App() {
       body: article,
       onSuccess: data => {
         const updatedArticles = articles.map(a =>
-          a.article_id === article_id ? data : a
+          a.article_id === article_id ? data.article : a
         );
         setArticles(updatedArticles);
         setCurrentArticleId(null);

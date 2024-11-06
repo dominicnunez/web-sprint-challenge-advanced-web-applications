@@ -36,11 +36,11 @@ export default function ArticleForm(props) {
     // and the form values as arguments.
     // If it's not, we should call `postArticle` with the form values as an argument.
     if (currentArticleId) {
-      updateArticle(currentArticleId, values);
+      updateArticle({ "article_id": currentArticleId, "article": values })
     } else {
       postArticle(values);
     }
-    // Finally, we should reset the form values and the `currentArticle` prop.
+    // Finally, we should reset the form values.
     setValues(initialFormValues);
   };
 
