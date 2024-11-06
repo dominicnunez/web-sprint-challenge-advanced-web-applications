@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import PT from 'prop-types'
 
 export default function Articles(props) {
@@ -9,7 +9,6 @@ export default function Articles(props) {
     getArticles,
     deleteArticle,
     setCurrentArticleId,
-    currentArticleId,
   } = props
 
   const navigate = useNavigate()
